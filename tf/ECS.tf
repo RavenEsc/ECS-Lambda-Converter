@@ -23,6 +23,18 @@ module "ecs" {
         }
       }
 
+      service_connect_configuration = {
+        namespace = "example"
+        service = {
+          client_alias = {
+            port     = 80
+            dns_name = "ecs-sample"
+          }
+          port_name      = "ecs-sample"
+          discovery_name = "ecs-sample"
+        }
+      }
+
       load_balancer = {
         service = {
           target_group_arn = "arn:aws:elasticloadbalancing:${var.REGION}:${var.ACCOUNT_NUM}:targetgroup/bluegreentarget1/209a844cd01825a4"
