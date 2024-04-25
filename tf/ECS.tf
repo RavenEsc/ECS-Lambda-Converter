@@ -30,9 +30,27 @@ module "ecs" {
           container_port   = 80
         }
       }
+      subnet_ids = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
+      security_group_rules = {
+        alb_ingress_3000 = {
+          type                     = "ingress"
+          from_port                = 80
+          to_port                  = 80
+          protocol                 = "tcp"
+          description              = "Service port"
+          source_security_group_id = "sg-12345678"
+        }
+        egress_all = {
+          type        = "egress"
+          from_port   = 0
+          to_port     = 0
+          protocol    = "-1"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      }
     }
   }
-
+  
   tags = {
     Environment = "Development"
     Project     = "Example"
