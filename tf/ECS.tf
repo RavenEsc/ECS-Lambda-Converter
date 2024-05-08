@@ -43,7 +43,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   container_definitions = jsonencode([
     {
       name = "dockergs"
-      image = "public.ecr.aws/docker/library/hello-world:latest"
+      image = "public.ecr.aws/docker/library/wordpress:beta-php8.3-fpm-alpine"
       cpu = 256
       memory = 512
       essential = true
