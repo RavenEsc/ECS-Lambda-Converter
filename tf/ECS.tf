@@ -30,10 +30,75 @@ resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers" {
   }
 }
 
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecs-task-execution-role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
+  name = "ecs-task-execution-role-policy"
+  role = aws_iam_role.ecs_task_execution_role.name
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+            ],
+            "Resource": [
+                "arn:aws:secretsmanager:${var.region}:${var.acc_num}:secret:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:${var.region}:${var.acc_num}:parameter/*"
+            ]
+        }
+    ]
+}
+EOF
+}
+
+
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   family                   = "my-ecs-task" 
   network_mode             = "awsvpc"
-  execution_role_arn       =  "arn:aws:iam::${var.acc_num}:role/ecsTaskExecutionRole"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   cpu                      = 256
   runtime_platform {
     operating_system_family = "LINUX"
