@@ -49,49 +49,9 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
-  name = "ecs-task-execution-role-policy"
-  role = aws_iam_role.ecs_task_execution_role.name
-
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ecr:GetAuthorizationToken",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret"
-            ],
-            "Resource": [
-                "arn:aws:secretsmanager:${var.region}:${var.acc_num}:secret:*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter"
-            ],
-            "Resource": [
-                "arn:aws:ssm:${var.region}:${var.acc_num}:parameter/*"
-            ]
-        }
-    ]
-}
-EOF
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  role       = aws_iam_role.ecs_task_execution_role.name
 }
 
 
