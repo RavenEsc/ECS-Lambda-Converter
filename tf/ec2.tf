@@ -6,7 +6,7 @@ resource "aws_launch_template" "ecs_lt" {
   key_name = " "
   vpc_security_group_ids = [aws_security_group.security_group.id]
   iam_instance_profile {
-    name = "AmazonEC2ContainerServiceforEC2Role"
+    name = "AWSServiceRoleForECS"
   }
 
   block_device_mappings {
