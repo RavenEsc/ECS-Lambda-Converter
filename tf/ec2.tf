@@ -3,10 +3,10 @@ resource "aws_launch_template" "ecs_lt" {
   image_id = "ami-07caf09b362be10b8"
   instance_type = "t3.micro"
 
-  key_name = " "
+  key_name = "ecskey1"
   vpc_security_group_ids = [aws_security_group.security_group.id]
   iam_instance_profile {
-    name = "AWSServiceRoleForECS"
+    name = "ecsInstanceRole"
   }
 
   block_device_mappings {
