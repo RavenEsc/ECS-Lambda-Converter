@@ -1,63 +1,71 @@
-# name: "Lambda Docker Image Build and Push"
+name: "ECS Docker Image Build and Push"
 
-# on:
-#   pull_request:
+on:
+  workflow_run:
+       workflows: ["Terraform Pre Apply"]
+       types: 
+           - completed
 
-# jobs:
-#   Docker:
-#     runs-on: ubuntu-latest
-#     permissions:
-#       id-token: write
-#       contents: read
-#     steps:
-#       - 
-#         name: Checkout
-#         uses: actions/checkout@v2
-#       - 
-#         name: Configure AWS credentials from Test account
-#         uses: aws-actions/configure-aws-credentials@master
-#         with:
-#           role-to-assume: arn:aws:iam::464004139021:role/GithubActionsRole
-#           aws-region: us-east-1
+env:
+    AWS_ROLE: "${{ secrets.AWS_ROLE }}"
+    ECR_REPO: "${{ secrets.ECR_REPO }}"
+    AWS_REGION: us-east-1
 
-#       - 
-#         name: Create and Display ECR Repo
-#         run: aws ecr create-repository --repository-name xxxxxxxxx || echo "ECR Repo already exists, skipping command."
+jobs:
+  Docker:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v2
+      - 
+        name: Configure AWS credentials from Test account
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - 
+        name: Create and Display ECR Repo
+        run: aws ecr create-repository --repository-name ${{ env.ECR_REPO }} || echo "ECR Repo already exists, skipping command."
         
-#       - 
-#         name: Login to Amazon ECR
-#         id: login-ecr
+      - 
+        name: Login to Amazon ECR
+        id: login-ecr
         
-#         uses: aws-actions/amazon-ecr-login@v1
-#         with:
-#           mask-password: true
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
 
-#       -
-#         name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-#       -
-#         name: Build and push Lambda Enviornment
-#         uses: docker/build-push-action@v5
-#         env:
-#           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#           IMAGE: lambdaConverter
-#           TAG: latest
-#         with:
-#           push: true
-#           context: ???
-#           provenance: false
-#           tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE }}:${{ env.TAG }}
+      -
+        name: Build and push Lambda Enviornment
+        uses: docker/build-push-action@v5
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE: lambdaConverter
+          TAG: latest
+        with:
+          push: true
+          context: ???
+          provenance: false
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE }}:${{ env.TAG }}
 
-#       -
-#         name: Build and push ECS Enviornment
-#         uses: docker/build-push-action@v5
-#         env:
-#           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#           IMAGE: ecsLambdaConverter
-#           TAG: latest
-#         with:
-#           push: true
-#           context: ???
-#           provenance: false
-#           tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE }}:${{ env.TAG }}
+      -
+        name: Build and push ECS Enviornment
+        uses: docker/build-push-action@v5
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE: ecsLambdaConverter
+          TAG: latest
+        with:
+          push: true
+          context: ???
+          provenance: false
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE }}:${{ env.TAG }}
