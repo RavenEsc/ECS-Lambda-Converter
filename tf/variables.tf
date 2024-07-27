@@ -6,7 +6,7 @@ variable "region" {
 
 variable "acc_num" {
     type = string
-    default = "464004139021"
+    default = "############"
 }
 
 variable "vpc_cidr" {
